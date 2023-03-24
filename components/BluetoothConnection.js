@@ -21,17 +21,22 @@ const BluetoothConnection = () => {
   };
 
   const sendDataToDevice = async () => {
+    console.log("Sending data to device");
     if (!device) {
+      console.log("No device connected");
       setError("No device connected");
       return;
     }
 
     try {
+      console.log("Connecting to GATT server");
       const server = await device.gatt.connect();
       if (!server) {
+        console.log("Failed to connect to GATT server");
         setError("Failed to connect to GATT server");
         return;
       }
+      console.log("Connected to GATT server");
 
       const service = await server.getPrimaryService(
         "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
@@ -40,13 +45,16 @@ const BluetoothConnection = () => {
         setError("Failed to get primary service");
         return;
       }
-
+      console.log("Got primary service");
       const characteristic = await service.getCharacteristic(
         "beb5483e-36e1-4688-b7f5-ea07361b26a8"
       );
       if (!characteristic) {
+        console.log("Failed to get characteristic");
         setError("Failed to get characteristic");
         return;
+      } else {
+        console.log("Got characteristic");
       }
 
       const data = new TextEncoder().encode("123");
