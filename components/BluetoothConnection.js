@@ -1,18 +1,15 @@
-// components/BluetoothConnection.js
-import React, { useState } from "react";
-
+// useState, useEffect
+import React, { useState, useEffect } from "react";
 const BluetoothConnection = () => {
   const [device, setDevice] = useState(null);
   const [error, setError] = useState(null);
 
   const requestDevice = async () => {
     try {
-      // acceptAllDevices
       const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: ["4fafc201-1fb5-459e-8fcc-c5c9c331914b"],
+        optionalServices: ["fbba4179-b71a-4db7-8b48-6ff849aba480"],
       });
-
       setDevice(device);
       setError(null);
     } catch (err) {
@@ -21,43 +18,27 @@ const BluetoothConnection = () => {
   };
 
   const sendDataToDevice = async () => {
-    console.log("Sending data to device");
     if (!device) {
-      console.log("No device connected");
       setError("No device connected");
       return;
     }
-
     try {
-      console.log("Connecting to GATT server");
+      console.log(device);
       const server = await device.gatt.connect();
-      if (!server) {
-        console.log("Failed to connect to GATT server");
-        setError("Failed to connect to GATT server");
-        return;
-      }
-      console.log("Connected to GATT server");
-
+      console.log(server);
       const service = await server.getPrimaryService(
-        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+        "fbba4179-b71a-4db7-8b48-6ff849aba480"
       );
-      if (!service) {
-        setError("Failed to get primary service");
-        return;
-      }
-      console.log("Got primary service");
       const characteristic = await service.getCharacteristic(
-        "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+        "4f36693f-b7a4-4e29-981f-cb00bb0d38d9"
       );
-      if (!characteristic) {
-        console.log("Failed to get characteristic");
-        setError("Failed to get characteristic");
-        return;
-      } else {
-        console.log("Got characteristic");
-      }
-
-      const data = new TextEncoder().encode("123");
+      // random 4 digit number
+      const randomNumber = Math.floor(1000 + Math.random() * 9000);
+      // convert to string
+      const randomNumberString = randomNumber.toString();
+      // only length of 4
+      const randomNumberString4 = randomNumberString.substring(0, 4);
+      const data = new TextEncoder().encode(randomNumberString4);
       await characteristic.writeValue(data);
       console.log("Data sent");
     } catch (err) {
@@ -65,10 +46,17 @@ const BluetoothConnection = () => {
     }
   };
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      sendDataToDevice();
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [device]);
+
   return (
     <div>
       <button onClick={requestDevice}>Connect to device</button>
-      <button onClick={sendDataToDevice}>Send Data</button>
       {error && <p>Error: {error}</p>}
       {device && <p>Connected to {device.name}</p>}
     </div>
