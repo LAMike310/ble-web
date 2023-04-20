@@ -1,8 +1,12 @@
 // useState, useEffect
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+
 const BluetoothConnection = () => {
   const [device, setDevice] = useState(null);
   const [error, setError] = useState(null);
+  // dataSent
+  const [dataSent, setDataSent] = useState(false);
 
   const requestDevice = async () => {
     try {
@@ -17,7 +21,15 @@ const BluetoothConnection = () => {
     }
   };
 
+  async function getBitcoinPriceLambda() {
+    const response = await axios.get(
+      "https://xtnv62kss0.execute-api.us-west-1.amazonaws.com/"
+    );
+    return response.data;
+  }
+
   const sendDataToDevice = async () => {
+    setDataSent(false);
     if (!device) {
       setError("No device connected");
       requestDevice();
@@ -25,48 +37,30 @@ const BluetoothConnection = () => {
     }
     let server;
     try {
-      // stop writing value to device
-      // Connect to GATT server
       server = await device.gatt.connect();
-      // stop all GATT operations
-
       const service = await server.getPrimaryService(
         "fbba4179-b71a-4db7-8b48-6ff849aba480"
       );
       const characteristic = await service.getCharacteristic(
         "4f36693f-b7a4-4e29-981f-cb00bb0d38d9"
       );
-
-      // random 4 digit number
-      const createRandomNumber = () =>
-        Math.floor(1000 + Math.random() * 9000)
-          .toString()
-          .substring(0, 4);
-      // create 10 random numbers
-      const arrayOfRandomNumbers = Array.from({ length: 5 }, () =>
-        createRandomNumber()
-      );
-      // convert array to string
-      const stringOfRandomNumbers = arrayOfRandomNumbers.join(",");
-      console.log(stringOfRandomNumbers);
-      // Disconnect after 10 seconds
-      setTimeout(async () => {
-        sendDataToDevice();
-      }, 5000);
-      const data = new TextEncoder().encode(stringOfRandomNumbers);
+      const arrayOfPrices = await getBitcoinPriceLambda();
+      const stringOfBitcoinPrices = arrayOfPrices.join(",");
+      console.log(stringOfBitcoinPrices);
+      const data = new TextEncoder().encode(stringOfBitcoinPrices);
       await characteristic.writeValue(data);
       console.log("Data sent");
+      setDataSent(true);
     } catch (err) {
       setError(err.message);
     }
   };
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     sendDataToDevice();
-  //   }, 1000);
-
-  //   return () => clearInterval(intervalId);
-  // }, [device]);
+  useEffect(() => {
+    if (dataSent == true) {
+      console.log("Sending another request");
+      sendDataToDevice();
+    }
+  }, [dataSent]);
 
   return (
     <div>
