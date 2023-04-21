@@ -58,7 +58,7 @@ const BluetoothConnection = () => {
   };
   useEffect(() => {
     if (dataSent == true) {
-      console.log("Sending another request");
+      console.log("Sending another request to Lamda");
       sendDataToDevice();
     }
   }, [dataSent]);
