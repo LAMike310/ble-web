@@ -39,11 +39,12 @@ const BluetoothConnection = () => {
     try {
       server = await device.gatt.connect();
       const service = await server.getPrimaryService(
-        "fbba4179-b71a-4db7-8b48-6ff849aba480"
+        "5fc7e946-3b94-4855-958f-668ec0074fb0"
       );
       const characteristic = await service.getCharacteristic(
-        "4f36693f-b7a4-4e29-981f-cb00bb0d38d9"
+        "79e122ae-e43f-44b2-bd0b-5e51d1ebc0a6"
       );
+
       const arrayOfPrices = await getBitcoinPriceLambda();
       const stringOfBitcoinPrices = arrayOfPrices.join(",");
       console.log(stringOfBitcoinPrices);
