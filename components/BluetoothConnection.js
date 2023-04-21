@@ -12,7 +12,7 @@ const BluetoothConnection = () => {
     try {
       const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: ["fbba4179-b71a-4db7-8b48-6ff849aba480"],
+        optionalServices: ["5fc7e946-3b94-4855-958f-668ec0074fb0"],
       });
       setDevice(device);
       setError(null);
