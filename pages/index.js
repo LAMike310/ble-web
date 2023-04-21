@@ -10,7 +10,7 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1>Next.js Web Bluetooth Example</h1>
+        <h1>Next.js Web Bluetooth Example - Nick</h1>
         <BluetoothConnection />
       </main>
     </div>
