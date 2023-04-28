@@ -12,7 +12,7 @@ const BluetoothConnection = () => {
     try {
       const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: ["fbba4179-b71a-4db7-8b48-6ff849aba480"],
+        optionalServices: ["2db70961-e9a8-4dd1-a0fd-69a1d852fe43"],
       });
       setDevice(device);
       setError(null);
@@ -28,7 +28,24 @@ const BluetoothConnection = () => {
     return response.data;
   }
 
-  const sendDataToDevice = async () => {
+  const getRandomNumbers = async (num) => {
+    // generate an array of 4 digit random numbers, num times
+    let arrayOfNumbers = [];
+    for (let i = 0; i < num; i++) {
+      arrayOfNumbers.push(Math.floor(Math.random() * 10000));
+    }
+    return arrayOfNumbers;
+  };
+
+  // const sendDataInChunks = async (characteristic, data) => {
+  //   const chunkSize = 20; // Adjust this value based on your device's supported MTU size
+  //   for (let i = 0; i < data.length; i += chunkSize) {
+  //     const chunk = data.slice(i, i + chunkSize);
+  //     await characteristic.writeValue(chunk);
+  //   }
+  // };
+
+  const sendDataToDevice = async ({ sendInChunks = false }) => {
     setDataSent(false);
     if (!device) {
       setError("No device connected");
@@ -39,10 +56,10 @@ const BluetoothConnection = () => {
     try {
       server = await device.gatt.connect();
       const service = await server.getPrimaryService(
-        "fbba4179-b71a-4db7-8b48-6ff849aba480"
+        "2db70961-e9a8-4dd1-a0fd-69a1d852fe43"
       );
       const characteristic = await service.getCharacteristic(
-        "4f36693f-b7a4-4e29-981f-cb00bb0d38d9"
+        "ec2de08d-833f-4c9d-832e-ee0d0748d2cf"
       );
       const arrayOfPrices = await getBitcoinPriceLambda();
       const stringOfBitcoinPrices = arrayOfPrices.join(",");
@@ -57,15 +74,13 @@ const BluetoothConnection = () => {
   };
   useEffect(() => {
     if (dataSent == true) {
-      console.log("Sending another request");
-      sendDataToDevice();
+      console.log("Data sent");
     }
   }, [dataSent]);
 
   return (
     <div>
       <button onClick={requestDevice}>Connect to device</button>
-      {/* send data button */}
       <button onClick={sendDataToDevice}>Send data</button>
       {error && <p>Error: {error}</p>}
       {device && <p>Connected to {device.name}</p>}
